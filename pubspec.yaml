@@ -117,8 +117,8 @@ flutter:
 flutter_icons:
   android:  true
   ios: true
-  image_path_android: "assets/ikon_android.png"
-  image_path_ios: "assets/ikon.png"
+  image_path_android: "assets/icons/ikon_android.png"
+  image_path_ios: "assets/icons/ikon.png"
   remove_alpha_ios: true
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -168,7 +168,7 @@ flutter_native_splash:
 
   # The image parameter allows you to specify an image used in the splash screen.  It must be a 
   # png file.  
-  image: assets/ikon_tekst.png
+  image: assets/icons/ikon_tekst.png
 
   # The color_dark, background_image_dark, and image_dark are parameters that set the background
   # and image when the device is in dark mode. If they are not specified, the app will use the
