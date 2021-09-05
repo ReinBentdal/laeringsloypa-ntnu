@@ -6,3 +6,5 @@ Download the app on [Google Play Store](https://play.google.com/store/apps/detai
 [Apple App Store](https://apps.apple.com/us/app/læringsløypa/id1582187760).
 
 The project is licensed under [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/): [View license file](https://github.com/ReinBentdal/Leringsloypa/blob/master/License)
+
+![](https://github.com/ReinBentdal/laeringsloypa-ntnu/blob/master/assets/banner.png?raw=true)
