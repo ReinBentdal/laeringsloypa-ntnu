@@ -7,4 +7,10 @@ Download the app on [Google Play Store](https://play.google.com/store/apps/detai
 
 The project is licensed under [CC BY-SA](https://creativecommons.org/licenses/by-sa/4.0/): [View license file](https://github.com/ReinBentdal/Leringsloypa/blob/master/License)
 
+---
+
+To fork the project, new API keys needs to be inserted into the code. The following packages needs API keys to function:
+- [Google Maps](https://pub.dev/packages/google_maps_flutter)
+- [Firebase](https://pub.dev/packages/firebase_core)
+
 ![](https://github.com/ReinBentdal/laeringsloypa-ntnu/blob/master/assets/banner.png?raw=true)
