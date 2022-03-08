@@ -7,5 +7,6 @@ final laeringsloypa = LoypeModel(
   reiseboka: reiseboka,
   ryggsekkStartinnhold: [],
   loypenavn: 'Læringsløypa',
+  
   // estimertTid: 120,
 );

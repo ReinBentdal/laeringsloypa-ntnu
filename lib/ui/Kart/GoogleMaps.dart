@@ -12,6 +12,7 @@ import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
 import 'package:loypa/utils/tid_formattering.dart';
 import 'package:styled_widget/styled_widget.dart';
+import 'package:loypa/config/globals.dart' as globals;
 
 class GoogleMaps extends StatefulWidget {
   GoogleMaps({
@@ -218,7 +219,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             .padding(
                 horizontal: 20, top: 20 + MediaQuery.of(context).padding.top)
             .alignment(Alignment.topCenter),
-        if (kDebugMode)
+        if (kDebugMode || globals.beta)
           Icon(
             Icons.redo_outlined,
             color: Colors.white,

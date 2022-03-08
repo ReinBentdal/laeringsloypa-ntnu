@@ -15,6 +15,17 @@ final ugyldigPin = StateProvider<bool>((ref) => false);
 class SpillSammen extends StatelessWidget {
   const SpillSammen({Key? key}) : super(key: key);
 
+  void handlePinButton(BuildContext context) {
+    final pin = context.read(gruppepinVerdiProvider).state;
+    if (pin != '') {
+      Navigator.pushNamed(context, VerifiserPin.rute);
+    }
+  }
+
+  void opprettSpill(BuildContext context) {
+    Navigator.pushNamed(context, VelgLoype.rute);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -23,17 +34,14 @@ class SpillSammen extends StatelessWidget {
           builder: (context, child) {
             return child.padding(horizontal: 20).safeArea();
           },
-          child: Column(
+          child: SColumn(
             crossAxisAlignment: CrossAxisAlignment.start,
+            separator: const SizedBox(height: 40),
             children: [
               Text(
                 'Spill sammen',
-                style: Theme.of(context)
-                    .textTheme
-                    .headline1
-                    ?.copyWith(color: Theme.of(context).errorColor),
+                style: Theme.of(context).textTheme.headline1?.copyWith(color: Theme.of(context).errorColor),
               ).padding(top: 20),
-              const SizedBox(height: 40),
               SColumn(
                 separator: const SizedBox(height: 20),
                 children: [
@@ -56,22 +64,14 @@ class SpillSammen extends StatelessWidget {
                         },
                       ).constrained(maxWidth: 200).center(),
                       OutlinedButton(
-                        onPressed: () {
-                          final pin =
-                              context.read(gruppepinVerdiProvider).state;
-                          if (pin != '') {
-                            Navigator.pushNamed(context, VerifiserPin.rute);
-                          }
-                        },
+                        onPressed: () => handlePinButton(context),
                         child: Icon(
                           Icons.arrow_right,
                           size: 32,
                           color: Colors.white,
                         ),
                       )
-                          .decorated(
-                              color: Theme.of(context).accentColor,
-                              borderRadius: BorderRadius.circular(10))
+                          .decorated(color: Theme.of(context).accentColor, borderRadius: BorderRadius.circular(10))
                           .constrained(height: 50),
                     ],
                   ),
@@ -80,8 +80,7 @@ class SpillSammen extends StatelessWidget {
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                   $Button(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, VelgLoype.rute),
+                    onPressed: () => opprettSpill(context),
                     text: 'Opprett spill',
                   )
                 ],

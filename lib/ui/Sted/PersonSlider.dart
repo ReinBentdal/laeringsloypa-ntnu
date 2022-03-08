@@ -6,7 +6,6 @@ import 'package:loypa/ui/Oppgave/OppgaveSide.dart';
 import 'package:loypa/ui/Sted/PersonSelector.dart';
 import 'package:loypa/ui/Sted/PersonSnakkDialog.dart';
 import 'package:loypa/ui/Sted/StedShowcase.dart';
-import 'package:loypa/ui/Sted/StedSide.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
 import 'package:loypa/ui/widgets/atom/ShowAnimatedDialog.dart';

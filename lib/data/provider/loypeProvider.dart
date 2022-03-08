@@ -5,6 +5,7 @@ import 'package:loypa/data/model/Loype.dart';
 final loypeIdProvider = StateProvider<String?>((ref) => null);
 
 final valgtLoypeProvider = FutureProvider<LoypeModel?>((ref) async {
+
   final loypeId = ref.watch(loypeIdProvider).state;
 
   if (loypeId == null) return null;

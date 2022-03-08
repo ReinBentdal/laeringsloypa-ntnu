@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:loypa/ui/Sted/StedShowcase.dart';
-import 'package:loypa/ui/Sted/StedSide.dart';
 import 'package:loypa/ui/widgets/atom/SRow.dart';
 import 'package:styled_widget/styled_widget.dart';
 

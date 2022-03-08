@@ -44,12 +44,14 @@ class LoypeInfoModel {
   final String id;
   final Duration estimertTid;
   final String startlokasjon;
+  final bool public;
 
   LoypeInfoModel({
     required this.navn,
     required this.id,
     required this.estimertTid,
     required this.startlokasjon,
+    required this.public,
   });
 
   factory LoypeInfoModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,7 @@ class LoypeInfoModel {
       id: json['løype_id'],
       estimertTid: Duration(minutes: json['estimert_tid']),
       startlokasjon: json['startlokasjon'],
+      public: json['public'],
     );
   }
 }

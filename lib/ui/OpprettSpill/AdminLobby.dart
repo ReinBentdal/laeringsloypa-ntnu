@@ -6,7 +6,6 @@ import 'package:loypa/data/provider/gruppeProvider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loypa/data/provider/loypeProvider.dart';
 import 'package:loypa/ui/Dashbord/DashbordSide.dart';
-import 'package:loypa/ui/Dashbord/LoypeLaster.dart';
 import 'package:loypa/ui/OpprettSpill/GruppespillInfo.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
@@ -20,12 +19,14 @@ class AdminLobby extends StatelessWidget {
 
   Future<void> startSpill(BuildContext context) async {
     final gruppeId = context.read(gruppeIdProvider).state;
-    await FirebaseFirestore.instance
-        .collection('grupper')
-        .doc(gruppeId)
-        .update({
+    await FirebaseFirestore.instance.collection('grupper').doc(gruppeId).update({
       'status': 'startet',
     });
+  }
+
+  void avsluttGruppe(BuildContext context) async {
+    await Navigator.maybePop(context);
+    Navigator.popUntil(context, ModalRoute.withName(DashbordSide.rute));
   }
 
   @override
@@ -36,21 +37,16 @@ class AdminLobby extends StatelessWidget {
         context.read(gruppeIdProvider).state = null;
         context.read(loypeIdProvider).state = null;
 
-        final snapshot = await FirebaseFirestore.instance
-            .collection('grupper')
-            .doc(gruppeid)
-            .collection('deltakere')
-            .get();
+        final snapshot =
+            await FirebaseFirestore.instance.collection('grupper').doc(gruppeid).collection('deltakere').get();
 
         // fjerne alle deltakere
         snapshot.docs.forEach((doc) {
           doc.reference.delete();
         });
 
-        await FirebaseFirestore.instance
-            .collection('grupper')
-            .doc(gruppeid)
-            .delete();
+        await FirebaseFirestore.instance.collection('grupper').doc(gruppeid).delete();
+
         return true;
       },
       child: ProviderListener(
@@ -58,8 +54,7 @@ class AdminLobby extends StatelessWidget {
         onChange: (context, AsyncValue<GruppeModel> data) {
           data.whenData((gruppe) {
             if (gruppe.status == GruppeStatus.Startet) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName(DashbordSide.rute));
+              Navigator.popUntil(context, ModalRoute.withName(DashbordSide.rute));
               Navigator.pushNamed(context, GruppespillInfo.rute);
             }
           });
@@ -79,9 +74,13 @@ class AdminLobby extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Consumer(builder: (context, watch, _) {
-                      final docId = watch(gruppeIdProvider).state;
-                      final gruppe = watch(gruppeStreamProvider(docId!));
-                      final deltakere = watch(gruppeDeltakereProvider(docId));
+                      final gruppeId = watch(gruppeIdProvider).state;
+
+                      if (gruppeId == null)
+                        return const SizedBox();
+
+                      final gruppe = watch(gruppeStreamProvider(gruppeId));
+                      final deltakere = watch(gruppeDeltakereProvider(gruppeId));
                       return gruppe.when(
                         data: (data) {
                           return Column(
@@ -106,46 +105,36 @@ class AdminLobby extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Deltakere',
-                                    style:
-                                        Theme.of(context).textTheme.headline4,
+                                    style: Theme.of(context).textTheme.headline4,
                                   ),
                                   const SizedBox(height: 10),
                                   deltakere.when(
                                     data: (data) {
                                       return SColumn(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        separator:
-                                            Row(children: [SizedBox(height: 1)])
-                                                .decorated(
-                                                  border: Border(
-                                                    bottom: BorderSide(
-                                                      width: 1,
-                                                      color: Theme.of(context)
-                                                          .accentColor,
-                                                    ),
-                                                  ),
-                                                )
-                                                .padding(vertical: 5),
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        separator: Row(children: [SizedBox(height: 1)])
+                                            .decorated(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  width: 1,
+                                                  color: Theme.of(context).accentColor,
+                                                ),
+                                              ),
+                                            )
+                                            .padding(vertical: 5),
                                         children: data.map(
                                           (deltaker) {
-                                            final lokalBruker = deltaker.id ==
-                                                FirebaseAuth
-                                                    .instance.currentUser!.uid;
+                                            final lokalBruker = deltaker.id == FirebaseAuth.instance.currentUser!.uid;
                                             return Text(deltaker.navn,
                                                 style: TextStyle(
-                                                  fontWeight: lokalBruker
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
+                                                  fontWeight: lokalBruker ? FontWeight.bold : FontWeight.normal,
                                                 ));
                                           },
                                         ).toList(),
                                       ).padding(horizontal: 5);
                                     },
-                                    loading: () => LasterIndikator(
-                                        beskrivelse: 'Laster deltakere'),
-                                    error: (_, __) => Text(
-                                        'Feilet med å laste inn deltakerene'),
+                                    loading: () => LasterIndikator(beskrivelse: 'Laster deltakere'),
+                                    error: (_, __) => Text('Feilet med å laste inn deltakerene'),
                                   ),
                                 ],
                               )
@@ -162,8 +151,7 @@ class AdminLobby extends StatelessWidget {
                             ],
                           );
                         },
-                        loading: () =>
-                            LasterIndikator(beskrivelse: 'Laster gruppe'),
+                        loading: () => LasterIndikator(beskrivelse: 'Laster gruppe'),
                         error: (_, __) => Text('Feilet med å laste inn gruppe'),
                       );
                     }),
@@ -174,11 +162,7 @@ class AdminLobby extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     $Button(
-                      onPressed: () {
-                        Navigator.maybePop(context);
-                        Navigator.popUntil(
-                            context, ModalRoute.withName(DashbordSide.rute));
-                      },
+                      onPressed: () => avsluttGruppe(context),
                       color: Theme.of(context).errorColor,
                       text: 'Avslutt gruppe',
                     ),

@@ -33,7 +33,7 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  // ønsker å logge inn brukeren slik at man kan identifisere brukeren i spillet
+  // ønsker å logge inn brukeren slik at man kan identifisere brukeren med en id
   await FirebaseAuth.instance.signInAnonymously();
 
   runApp(
