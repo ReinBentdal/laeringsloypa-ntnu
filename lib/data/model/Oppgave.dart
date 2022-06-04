@@ -1,4 +1,4 @@
-import 'package:loypa/data/model/PersonHint.dart';
+import 'package:loypa/data/model/OppgaveHint.dart';
 import 'package:loypa/data/model/Ryggsekk.dart';
 import 'package:loypa/data/type/InputType.dart';
 
@@ -17,9 +17,10 @@ class OppgaveModel {
   final BaseInputType typespesifikk;
   final String riktigSvar;
   final List<RyggsekkGjenstandModel>? belonning;
-  bool oppgaveLost = false; // TODO: fjerne
   final List<OppgaveHintModel> hint;
   final int rekkefolge;
+
+  // bool oppgaveLost;
 
   OppgaveModel({
     required this.oppgavetekst,
@@ -29,6 +30,7 @@ class OppgaveModel {
     required this.rekkefolge,
     this.oppgaveKnappTekst,
     this.belonning,
+    // this.oppgaveLost = false,
   });
 
   factory OppgaveModel.fromJson(Map<String, dynamic> json) {

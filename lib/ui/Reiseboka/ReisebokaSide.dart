@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loypa/config/markdown/markdown_builders.dart';
 import 'package:loypa/config/markdown/markdown_stylesheet.dart';
-import 'package:loypa/data/provider/reisebokProvider.dart';
+import 'package:loypa/data/model/Reisebok.dart';
+import 'package:loypa/control/provider/reisebokProvider.dart';
 import 'package:loypa/ui/widgets/atom/SubpageAppbar.dart';
 import 'package:loypa/ui/widgets/molekyl/FirebaseImage.dart';
 import 'package:loypa/ui/widgets/molekyl/MarkdownNoScroll.dart';
@@ -14,10 +15,45 @@ class Reiseboka extends StatelessWidget {
   static const String rute = 'Reiseboka';
   Reiseboka({Key? key}) : super(key: key);
 
+  final bokmerkeIkon = (
+    BuildContext context,
+    ReisebokBokmerkeModel bokmerkedata,
+    bool aktiv,
+    void Function() onTap,
+  ) =>
+      FirebaseImage(
+        prefix: 'reiseboka/',
+        path: bokmerkedata.ikon,
+        showLoader: false,
+        height: 20,
+        semanticsLabel: 'Faneikon i reiseboka med navn ${bokmerkedata.tittel}',
+        color: aktiv ? Theme.of(context).backgroundColor : Theme.of(context).accentColor,
+      )
+          .padding(horizontal: 15, vertical: 10)
+          .decorated(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              width: 3,
+              color: Theme.of(context).primaryColor,
+            ),
+          )
+          .ripple(enable: !aktiv)
+          .decorated(
+            color: aktiv ? Theme.of(context).errorColor : null,
+            animate: true,
+          )
+          .animate(
+            Duration(milliseconds: 300),
+            Curves.easeOut,
+          )
+          .clipRRect(all: 10)
+          .gestures(onTap: onTap)
+          .padding(horizontal: 10)
+          .expanded();
+
   @override
   Widget build(BuildContext context) {
-    final pageController =
-        PageController(initialPage: context.read(valgtBokmerkeProvider).state);
+    final pageController = PageController(initialPage: context.read(valgtBokmerkeProvider).state);
 
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
@@ -50,42 +86,12 @@ class Reiseboka extends StatelessWidget {
                                 final erValgtBokmerke = valgtBokmerkeIndex == i;
                                 return MapEntry(
                                   i,
-                                  FirebaseImage(
-                                    prefix: 'reiseboka/',
-                                    path: valgtBokmerkedata.ikon,
-                                    showLoader: false,
-                                    height: 20,
-                                    semanticsLabel:
-                                        'Faneikon i reiseboka med navn ${valgtBokmerkedata.tittel}',
-                                    color: erValgtBokmerke
-                                        ? Theme.of(context).backgroundColor
-                                        : Theme.of(context).accentColor,
-                                  )
-                                      .padding(horizontal: 15, vertical: 10)
-                                      .decorated(
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          width: 3,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                      )
-                                      .ripple(enable: !erValgtBokmerke)
-                                      .decorated(
-                                        color: erValgtBokmerke
-                                            ? Theme.of(context).errorColor
-                                            : null,
-                                        animate: true,
-                                      )
-                                      .animate(
-                                        Duration(milliseconds: 300),
-                                        Curves.easeOut,
-                                      )
-                                      .clipRRect(all: 10)
-                                      .gestures(onTap: () {
-                                        pageController.jumpToPage(i);
-                                      })
-                                      .padding(horizontal: 10)
-                                      .expanded(),
+                                  bokmerkeIkon(
+                                    context,
+                                    valgtBokmerkedata,
+                                    erValgtBokmerke,
+                                    () => pageController.jumpToPage(i),
+                                  ),
                                 );
                               })
                               .values
@@ -94,8 +100,7 @@ class Reiseboka extends StatelessWidget {
                         // tab bar
                         PageView.builder(
                           controller: pageController,
-                          onPageChanged: (i) =>
-                              context.read(valgtBokmerkeProvider).state = i,
+                          onPageChanged: (i) => context.read(valgtBokmerkeProvider).state = i,
                           itemCount: data.bokmerker.length,
                           itemBuilder: (context, i) {
                             return ListView(

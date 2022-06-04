@@ -3,11 +3,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loypa/data/model/Person.dart';
 
 class StedsModel {
+  final String id;
   final List<PersonModel> personer;
   final List<LatLng> kartmarkering;
   final String stedsnavn;
   final String stedsbeskrivelse;
   StedsModel({
+    required this.id,
     required this.personer,
     required this.stedsnavn,
     required this.kartmarkering,
@@ -16,6 +18,7 @@ class StedsModel {
 
   factory StedsModel.fromJson(Map<String, dynamic> json) {
     return StedsModel(
+      id: json['id'],
       stedsnavn: json['stedsnavn'],
       stedsbeskrivelse: json['stedsbeskrivelse'],
       personer: json['personer']
@@ -29,6 +32,7 @@ class StedsModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'stedsnavn': stedsnavn,
       'stedsbeskrivelse': stedsbeskrivelse,
       'personer': personer.map((person) => person.toJson()).toList(),

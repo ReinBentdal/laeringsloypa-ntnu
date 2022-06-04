@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
 import 'package:loypa/ui/Sted/StedSide.dart';
 import 'package:loypa/ui/widgets/atom/BottomSheet.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';

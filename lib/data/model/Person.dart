@@ -1,12 +1,14 @@
 import 'package:loypa/data/model/Oppgave.dart';
 
 class PersonModel {
+  final String id;
   final String navn;
   final PersonSamtaleModel? samtale;
   final String bilde;
   final OppgaveModel oppgave;
 
   PersonModel({
+    required this.id,
     required this.navn,
     this.samtale,
     required this.bilde,
@@ -15,6 +17,7 @@ class PersonModel {
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
     return PersonModel(
+      id: json['id'],
       navn: json['navn'],
       bilde: json['bilde'],
       samtale: json['samtale'] != null
@@ -26,6 +29,7 @@ class PersonModel {
 
   Map<String, dynamic> toJson() {
     final json = {
+      'id': id,
       'navn': navn,
       'bilde': bilde,
       'oppgave': oppgave.toJson(),
@@ -43,11 +47,11 @@ class PersonModel {
 class PersonSamtaleModel {
   final String tittel;
   final List<String> dialog;
-  bool sett = false; // TODO: Fjerne
 
   PersonSamtaleModel({
     required this.tittel,
     required this.dialog,
+    // this.lest = false,
   });
 
   factory PersonSamtaleModel.fromJson(Map<String, dynamic> json) {

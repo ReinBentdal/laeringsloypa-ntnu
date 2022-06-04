@@ -15,7 +15,7 @@ final valgtLoypeProvider = FutureProvider<LoypeModel?>((ref) async {
 
   if (loypeData.exists == false) return null;
 
-  return LoypeModel.fromJson(loypeData.data()!);
+  return LoypeModel.fromJson(loypeId, loypeData.data()!);
 });
 
 final loypeDataFetchCountProvider = StateProvider((ref) => 0);

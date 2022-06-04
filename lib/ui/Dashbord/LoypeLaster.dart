@@ -1,8 +1,8 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
+import 'package:loypa/control/provider/loypeProvider.dart';
+import 'package:loypa/main.dart';
 import 'package:loypa/ui/Dashbord/DashbordSide.dart';
 import 'package:loypa/ui/Kart/KartSide.dart';
 import 'package:loypa/ui/widgets/atom/varslinger.dart';
@@ -74,43 +74,30 @@ class _LoypeLasterState extends State<LoypeLaster> {
 
   @override
   void initState() {
+    super.initState();
     () async {
       try {
-        final loype = await context.read(valgtLoypeProvider.future);
-        if (loype == null) {
-          setState(() {
-            this.lasterstatus = Lasterstatus.Feilmelding;
-          });
-          Navigator.maybePop(context);
-          this.visFeilmelding(context);
-          return;
-        }
-        setState(() {
-          this.lasterstatus = Lasterstatus.Innhold;
-        });
         final loypeId = context.read(loypeIdProvider).state;
-        if (loypeId == null) {
-          setState(() {
-            this.lasterstatus = Lasterstatus.Feilmelding;
-          });
-          Navigator.maybePop(context);
-          this.visFeilmelding(context);
-          return;
-        }
+        await context.read(valgtLoypeProvider.future);
+        setState(() {
+          lasterstatus = Lasterstatus.Innhold;
+        });
         try {
           await this.precache(loypeId.toString() + '/');
         } catch (error) {
-          // ingne nødvendighet å cache all grafikk, fortsette som vanlig
+          // ikke en nødvendighet å cache all grafikk, fortsette som vanlig
           print('FEILET MED Å LASTE INN ALL GRAFIKK');
         }
-        Navigator.popAndPushNamed(context, KartSide.rute);
-      } catch (error) {
+        Navigator.popAndPushNamed(navigatorKey.currentContext ?? context, KartSide.rute);
+      } catch (error, stack) {
         // feilet med å laste inn løype
+        print("feilet med å laste inn løypen");
+        print(error);
+        print(stack);
         Navigator.popUntil(context, ModalRoute.withName(DashbordSide.rute));
         visFeilmelding(context);
       }
     }();
-    super.initState();
   }
 
   @override

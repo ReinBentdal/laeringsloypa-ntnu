@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
 import 'package:loypa/ui/Dashbord/AvsluttLoype.dart';
 import 'package:loypa/ui/widgets/atom/BottomSheet.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
@@ -26,6 +29,9 @@ class SpillFerdig extends StatelessWidget {
           $Button(
             text: 'Vis resultatet',
             onPressed: () {
+              final gruppeId = context.read(gruppeIdProvider).state;
+              assert(gruppeId != null);
+              // context.read(loypeStateProvider(gruppeId!).notifier).settStedFullfort(context);
               Navigator.pushNamedAndRemoveUntil(
                   context, AvsluttLoype.rute, (route) => false);
             },

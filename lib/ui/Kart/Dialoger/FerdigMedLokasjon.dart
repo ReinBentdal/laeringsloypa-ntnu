@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
 import 'package:loypa/ui/widgets/atom/BottomSheet.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
@@ -27,8 +29,9 @@ class FerdigMedLokasjon extends StatelessWidget {
             text: 'Til neste lokasjon',
             onPressed: () {
               Navigator.pop(context);
-
-              context.read(stedIndexProvider).state++;
+              final gruppeId = context.read(gruppeIdProvider).state;
+              assert(gruppeId != null);
+              context.read(loypeStateProvider(gruppeId!).notifier).settStedFullfort(context);
             },
           )
         ],

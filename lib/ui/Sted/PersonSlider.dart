@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
 import 'package:loypa/data/model/Person.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
-import 'package:loypa/data/provider/oppgaveProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
 import 'package:loypa/ui/Oppgave/OppgaveSide.dart';
 import 'package:loypa/ui/Sted/PersonSelector.dart';
 import 'package:loypa/ui/Sted/PersonSnakkDialog.dart';
@@ -62,9 +63,7 @@ class _PersonSliderState extends State<PersonSlider> {
         Consumer(
           builder: (context, watch, _) {
             final valgtPerson = watch(valgtPersonProvider);
-            final samtaleLest = watch(personSamtaleLestProvider(
-                context.read(valgtPersonIndexProvider).state));
-            final oppgaveLost = watch(valgtOppgaveProvider).oppgaveLost;
+            final personState = watch(personStateProvider);
 
             return SColumn(
               separator: const SizedBox(height: 10),
@@ -81,10 +80,12 @@ class _PersonSliderState extends State<PersonSlider> {
                   key: snakkRef,
                   child: valgtPerson.samtale != null
                       ? $UpdateAlert(
-                          showAlert: !samtaleLest.state,
+                          showAlert: !personState.samtaleLest,
                           child: $Button(
                             onPressed: () {
-                              samtaleLest.state = true;
+                              final gruppeId = context.read(gruppeIdProvider).state;
+                              assert(gruppeId != null);
+                              context.read(loypeStateProvider(gruppeId!).notifier).settSamtalenLest(context);
                               $showAnimatedDialog(
                                 context: context,
                                 builder: (_) => $PersonSnakkDialog(),
@@ -93,17 +94,13 @@ class _PersonSliderState extends State<PersonSlider> {
                             text: 'Snakk',
                           ),
                         )
-                      : SizedBox(height: 50, width: 200)
-                          .decorated(color: Colors.blueGrey[100])
-                          .clipRRect(all: 10),
+                      : SizedBox(height: 50, width: 200).decorated(color: Colors.blueGrey[100]).clipRRect(all: 10),
                 ),
 
                 // Løs oppgave knapp
                 $Button(
                   key: losOppgaveRef,
-                  onPressed: oppgaveLost
-                      ? null
-                      : () => Navigator.pushNamed(context, OppgaveSide.rute),
+                  onPressed: personState.oppgaveLost ? null : () => Navigator.pushNamed(context, OppgaveSide.rute),
                   text: valgtPerson.oppgave.oppgaveKnappTekst ?? 'Løs oppgave',
                 ),
               ],

@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loypa/control/loypeControl.dart';
 import 'package:loypa/data/model/Gruppe.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
+import 'package:loypa/control/provider/loypeProvider.dart';
+import 'package:loypa/data/storage/loype_local_storage.dart';
 import 'package:loypa/ui/Dashbord/DashbordSide.dart';
 import 'package:loypa/ui/OpprettSpill/GruppespillInfo.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
@@ -18,10 +20,12 @@ class AdminLobby extends StatelessWidget {
   const AdminLobby({Key? key}) : super(key: key);
 
   Future<void> startSpill(BuildContext context) async {
+
+    final loypeId = context.read(loypeIdProvider).state;
     final gruppeId = context.read(gruppeIdProvider).state;
-    await FirebaseFirestore.instance.collection('grupper').doc(gruppeId).update({
-      'status': 'startet',
-    });
+    assert(loypeId != null);
+    assert(gruppeId != null);
+    LoypeControl.start(gruppeId!);
   }
 
   void avsluttGruppe(BuildContext context) async {
@@ -33,24 +37,12 @@ class AdminLobby extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final gruppeid = context.read(gruppeIdProvider).state;
-        context.read(gruppeIdProvider).state = null;
-        context.read(loypeIdProvider).state = null;
-
-        final snapshot =
-            await FirebaseFirestore.instance.collection('grupper').doc(gruppeid).collection('deltakere').get();
-
-        // fjerne alle deltakere
-        snapshot.docs.forEach((doc) {
-          doc.reference.delete();
-        });
-
-        await FirebaseFirestore.instance.collection('grupper').doc(gruppeid).delete();
-
-        return true;
+        final gruppeId = context.read(gruppeIdProvider).state;
+        print("sletter gruppe");
+        return await LoypeControl.forlatOgSlett(context, gruppeId!);
       },
       child: ProviderListener(
-        provider: gruppeStreamProvider(context.read(gruppeIdProvider).state),
+        provider: gruppeStreamProvider,
         onChange: (context, AsyncValue<GruppeModel> data) {
           data.whenData((gruppe) {
             if (gruppe.status == GruppeStatus.Startet) {
@@ -79,8 +71,8 @@ class AdminLobby extends StatelessWidget {
                       if (gruppeId == null)
                         return const SizedBox();
 
-                      final gruppe = watch(gruppeStreamProvider(gruppeId));
-                      final deltakere = watch(gruppeDeltakereProvider(gruppeId));
+                      final gruppe = watch(gruppeStreamProvider);
+                      final deltakere = watch(gruppeDeltakereProvider);
                       return gruppe.when(
                         data: (data) {
                           return Column(

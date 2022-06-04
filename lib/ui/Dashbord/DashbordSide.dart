@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:loypa/ui/Dashbord/Meta.dart';
 import 'package:loypa/ui/Dashbord/SpillSammen.dart';
@@ -56,7 +55,7 @@ class _DashbordSideState extends State<DashbordSide> {
         onTap: handleNavbarTap,
         items: [
           BottomNavigationBarItem(
-            label: 'Spill individuelt',
+            label: 'Løyper',
             icon: Icon(Icons.map),
           ),
           BottomNavigationBarItem(

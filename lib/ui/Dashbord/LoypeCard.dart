@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loypa/data/model/Loype.dart';
+import 'package:loypa/data/storage/loype_local_storage.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
 import 'package:loypa/ui/widgets/atom/SRow.dart';
@@ -13,12 +14,12 @@ class LoypeCard extends StatelessWidget {
     this.loype, {
     Key? key,
     required this.onVelg,
-    this.visLedertavleKnapp = true,
+    required this.erGruppespill,
   }) : super(key: key);
 
   final LoypeInfoModel loype;
-  final bool visLedertavleKnapp;
-  final void Function() onVelg;
+  final bool erGruppespill;
+  final void Function(bool fortsett) onVelg;
 
   void visLedertavle(BuildContext context) {
     Navigator.pushNamed(
@@ -69,22 +70,34 @@ class LoypeCard extends StatelessWidget {
         ).alignment(Alignment.topLeft).padding(top: 15, horizontal: 20, bottom: 40).ripple().decorated(
               border: Border.all(
                 width: 3,
-                color: Theme.of(context).errorColor,
+                color: loype.public ? Theme.of(context).errorColor : Colors.red,
               ),
               borderRadius: BorderRadius.circular(20),
-              color: loype.public ? Theme.of(context).backgroundColor : Color(0xffDCCC7C),
+              color: Theme.of(context).backgroundColor,
             ),
         SRow(
           mainAxisAlignment: MainAxisAlignment.center,
-          separator: const SizedBox(width: 5),
+          separator: const SizedBox(width: 15),
           children: [
-            $Button(
-              onPressed: () => onVelg(),
-              text: 'Velg',
-            ).constrained(width: 150),
-            if (visLedertavleKnapp) ledertavleButton(context),
+            SRow(
+              mainAxisAlignment: MainAxisAlignment.start,
+              separator: const SizedBox(width: 5),
+              children: [
+                $Button(
+                  onPressed: () => onVelg(false),
+                  text: erGruppespill ? 'Velg' : 'Start',
+                ).constrained(width: 70),
+                if (!erGruppespill && LoypeLocalStorage.containesRoute(loypeId: loype.id))
+                  $Button(
+                    text: 'Fortsett',
+                    color: Theme.of(context).primaryColor,
+                    onPressed: () => onVelg(true),
+                  ).constrained(width: 100),
+              ],
+            ),
+            if (erGruppespill == false) ledertavleButton(context),
           ],
-        ).translate(offset: Offset(0, -27.5)),
+        ).padding(horizontal: 30).translate(offset: Offset(0, -27.5)),
       ],
     );
   }

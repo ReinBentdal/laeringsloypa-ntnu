@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:loypa/data/model/PersonHint.dart';
-import 'package:loypa/data/provider/RyggsekkProvider.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
-import 'package:loypa/data/provider/hintProvider.dart';
-import 'package:loypa/data/provider/oppgaveProvider.dart';
-import 'package:loypa/data/provider/spillProvider.dart';
+import 'package:loypa/data/model/OppgaveHint.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/hintProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
+import 'package:loypa/control/provider/oppgaveProvider.dart';
 import 'package:loypa/main.dart';
 import 'package:loypa/ui/Oppgave/OppgaveFullfortDialog.dart';
 import 'package:loypa/ui/Sted/StedSide.dart';
@@ -28,26 +26,16 @@ class HintSide extends StatelessWidget {
   const HintSide({Key? key}) : super(key: key);
 
   void onLosOppgave(BuildContext context) async {
-    // gjøre spillet ugyldig slik at tiden ikke kommer på ledertablen
-    context.read(spillGyldigProvider).state = false;
-
-    final gruppeId = context.read(gruppeIdProvider).state;
-    FirebaseFirestore.instance.collection('grupper').doc(gruppeId).update({
-      'gyldig': false,
-    });
-
     final ryggsekkGjenstand = context.read(valgtOppgaveProvider).belonning;
-    final oppgaveController = context.read(valgtOppgaveProvider.notifier);
-    final ryggsekkController = context.read(ryggsekkInnholdProvider.notifier);
+    final gruppeId = context.read(gruppeIdProvider).state;
+    assert(gruppeId != null);
+    final loypeState = context.read(loypeStateProvider(gruppeId!).notifier);
+
+    loypeState.settLoypeUgyldig(context);
 
     Navigator.popUntil(context, ModalRoute.withName(Sted.rute));
 
     if (ryggsekkGjenstand != null) {
-      ryggsekkController.leggTilGjenstander(
-        context,
-        ryggsekkGjenstand,
-      );
-
       await Future.delayed(Duration(milliseconds: 150));
 
       await $showAnimatedDialog(
@@ -55,8 +43,7 @@ class HintSide extends StatelessWidget {
         builder: (context) => OppgaveFullfortDialog(ryggsekkGjenstand),
       );
     }
-
-    oppgaveController.setOppgaveLost();
+    loypeState.settOppgavenLost(navigatorKey.currentContext ?? context);
   }
 
   Future<void> hintDialog(BuildContext context, OppgaveHintModel oppgavehint) {
@@ -127,8 +114,9 @@ class HintSide extends StatelessWidget {
   }
 
   void apneHint(BuildContext context, int i) {
-    context.read(oppgaveHintProvider.notifier).setOppgaveHintApnet(i);
     final gruppeId = context.read(gruppeIdProvider).state;
+    assert(gruppeId != null);
+    context.read(loypeStateProvider(gruppeId!).notifier).settHintBrukt(context, i);
     FirebaseFirestore.instance.collection('grupper').doc(gruppeId).update({
       'hint_brukt': FieldValue.increment(1),
     });
@@ -146,8 +134,9 @@ class HintSide extends StatelessWidget {
             Consumer(
               builder: (context, watch, _) {
                 final oppgavehint = watch(oppgaveHintProvider);
-                final nestePersonApen =
-                    watch(nestePersonHintApenProvider).state;
+                final nestePersonApen = watch(nestePersonHintApenProvider).state;
+                final personState = watch(personStateProvider);
+
                 return SColumn(
                   separator: const SizedBox(height: 10),
                   children: [
@@ -175,22 +164,24 @@ class HintSide extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
+
+                    /* button for each available person hint */
                     ...oppgavehint
                         .asMap()
                         .map((i, hint) {
                           return MapEntry(i, () {
-                            if (!hint.brukt) {
+                            if (personState.hintBrukt[i] == false) {
                               return $Button(
                                 text: 'Åpne hint',
-                                onPressed: () => apneDialog(
-                                    context, () => apneHint(context, i)),
+                                onPressed: () => apneDialog(context, () => apneHint(context, i)),
                                 color: Theme.of(context).errorColor,
                               );
+                            } else {
+                              return $Button(
+                                text: 'Les hint',
+                                onPressed: () => hintDialog(context, hint),
+                              );
                             }
-                            return $Button(
-                              text: 'Les hint',
-                              onPressed: () => hintDialog(context, hint),
-                            );
                           }());
                         })
                         .values
@@ -208,8 +199,7 @@ class HintSide extends StatelessWidget {
               // final alleHintBrukt = watch(alleHintBruktProvider);
               final alleHintBrukt = true;
               return $Button(
-                color:
-                    alleHintBrukt ? Theme.of(context).errorColor : Colors.grey,
+                color: alleHintBrukt ? Theme.of(context).errorColor : Colors.grey,
                 text: 'Løs oppgaven',
                 // onPressed: () => alleHintBrukt ? losOppgaveDialog(context) : losOppgaveLaastDialog(context),
                 onPressed: () => losOppgaveDialog(context),

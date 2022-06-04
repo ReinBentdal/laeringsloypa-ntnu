@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
-import 'package:loypa/data/provider/loyperProvider.dart';
+import 'package:loypa/control/loypeControl.dart';
+import 'package:loypa/control/provider/loyperProvider.dart';
 import 'package:loypa/ui/OpprettSpill/VelgBrukernavnSingle.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import 'LoypeCard.dart';
+import 'LoypeLaster.dart';
 
 class SpillIndividuelt extends StatelessWidget {
   const SpillIndividuelt({Key? key}) : super(key: key);
 
-  void velgLoype(BuildContext context, String id) {
-    context.read(loypeIdProvider).state = id;
-    Navigator.pushNamed(context, VelgBrukernavnSingle.rute);
+  void velgLoype(BuildContext context, String loypeId, bool fortsett) async {
+    if (fortsett == true) {
+      final suksess = await LoypeControl.fortsett(context, loypeId);
+      if (suksess) {
+        Navigator.pushNamed(context, LoypeLaster.rute);
+        return;
+      } else {
+        print("feilet med å fortsette løype");
+      }
+    } else {
+      Navigator.pushNamed(
+        context,
+        VelgBrukernavnSingle.rute,
+        arguments: loypeId,
+      );
+    }
   }
 
   @override
@@ -36,7 +50,8 @@ class SpillIndividuelt extends StatelessWidget {
                   children: loyper
                       .map((loype) => LoypeCard(
                             loype,
-                            onVelg: () => velgLoype(context, loype.id),
+                            erGruppespill: false,
+                            onVelg: (bool fortsett) => velgLoype(context, loype.id, fortsett),
                           ))
                       .toList(),
                 ),

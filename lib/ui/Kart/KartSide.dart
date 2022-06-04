@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/lokasjonProvider.dart';
+import 'package:loypa/control/provider/lokasjonProvider.dart';
 import 'package:loypa/ui/Kart/Kart.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
 import 'package:styled_widget/styled_widget.dart';
@@ -13,15 +13,6 @@ class KartSide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // floatingActionButton: IconButton(
-      //   onPressed: () =>
-      //       context.read(kartTilstandProvider).state = KartTilstand.Ankommet,
-      //   icon: Icon(Icons.place, color: Colors.white),
-      // ).decorated(
-      //   color: Colors.blue,
-      //   shape: BoxShape.circle,
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: Consumer(
         builder: (context, watch, _) {
           final tillatelse = watch(harLokasjonTillatelseProvider);

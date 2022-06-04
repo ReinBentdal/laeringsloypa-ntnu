@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
 import 'package:loypa/ui/widgets/molekyl/MultipageDialog.dart';
 
 // final _personSamtalesideProvider = StateProvider.autoDispose<int>((ref) => 0);

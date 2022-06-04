@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loypa/config/theme/inputDecoration.dart';
-import 'package:loypa/data/provider/RyggsekkProvider.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
-import 'package:loypa/data/provider/oppgaveProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
+import 'package:loypa/control/provider/oppgaveProvider.dart';
 import 'package:loypa/main.dart';
 import 'package:loypa/ui/Oppgave/GjomtTekst.dart';
 import 'package:loypa/ui/Oppgave/OppgaveFullfortDialog.dart';
@@ -36,17 +37,13 @@ class OppgaveSide extends StatelessWidget {
     final read = context.read(_losningProvider(personIndex)).state;
     if (read.toLowerCase() == riktigSvar.toLowerCase()) {
       final ryggsekkGjenstand = context.read(valgtOppgaveProvider).belonning;
-      final oppgaveController = context.read(valgtOppgaveProvider.notifier);
-      final ryggsekkController = context.read(ryggsekkInnholdProvider.notifier);
+      final gruppeId = context.read(gruppeIdProvider).state;
+      assert(gruppeId != null);
+      final loypeState = context.read(loypeStateProvider(gruppeId!).notifier);
 
       Navigator.popUntil(context, ModalRoute.withName(Sted.rute));
 
       if (ryggsekkGjenstand != null) {
-        ryggsekkController.leggTilGjenstander(
-          context,
-          ryggsekkGjenstand,
-        );
-
         await Future.delayed(Duration(milliseconds: 150));
 
         await $showAnimatedDialog(
@@ -54,8 +51,7 @@ class OppgaveSide extends StatelessWidget {
           builder: (context) => OppgaveFullfortDialog(ryggsekkGjenstand),
         );
       }
-
-      oppgaveController.setOppgaveLost();
+      loypeState.settOppgavenLost(navigatorKey.currentContext ?? context);
     } else {
       final feilLosning = context.read(_feilLosningProvider);
       feilLosning.state = true;
@@ -80,7 +76,7 @@ class OppgaveSide extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            HjelpIkon().positioned(top: 10, right: 10),
+            ValgIkon().positioned(top: 10, right: 10),
             SColumn(
               separator: const SizedBox(height: 30),
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,16 +99,12 @@ class OppgaveSide extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Skriv inn svaret',
-                                style: Theme.of(context).textTheme.headline4),
+                            Text('Skriv inn svaret', style: Theme.of(context).textTheme.headline4),
                             const SizedBox(height: 10),
                             TextField(
-                              controller:
-                                  TextEditingController(text: startverdi),
-                              decoration:
-                                  inputDecoration(context, 'Skriv her...'),
-                              onChanged: (value) =>
-                                  inputOnChange(context, value),
+                              controller: TextEditingController(text: startverdi),
+                              decoration: inputDecoration(context, 'Skriv her...'),
+                              onChanged: (value) => inputOnChange(context, value),
                             ),
                           ],
                         );
@@ -142,15 +134,13 @@ class OppgaveSide extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Skriv inn svaret',
-                                style: Theme.of(context).textTheme.headline4),
+                            Text('Skriv inn svaret', style: Theme.of(context).textTheme.headline4),
                             const SizedBox(height: 10),
                             MultiInput(
                               length: pinkodeInput.antall,
                               digits: pinkodeInput.antallPerFelt,
                               placeholder: pinkodeInput.hintTekst,
-                              onChange: (value) =>
-                                  inputOnChange(context, value),
+                              onChange: (value) => inputOnChange(context, value),
                               value: startverdi,
                             ),
                           ],

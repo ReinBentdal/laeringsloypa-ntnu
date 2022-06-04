@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 enum GruppeStatus { Venter, Startet, Avsluttet }
 
 class GruppeModel {
-  final String docId;
+  final String gruppeId;
   final String loypeId;
   final GruppeStatus status;
   final String gruppenavn;
@@ -14,7 +14,7 @@ class GruppeModel {
   final int hintBrukt;
 
   GruppeModel({
-    required this.docId,
+    required this.gruppeId,
     required this.loypeId,
     required this.status,
     required this.gruppenavn,
@@ -25,7 +25,7 @@ class GruppeModel {
     required this.hintBrukt,
   });
 
-  factory GruppeModel.fromJson(Map<String, dynamic> json) {
+  factory GruppeModel.fromJson(String gruppeId, Map<String, dynamic> json) {
     late GruppeStatus status;
 
     switch (json['status']) {
@@ -43,7 +43,7 @@ class GruppeModel {
     }
 
     return GruppeModel(
-      docId: json['doc_id'],
+      gruppeId: gruppeId,
       loypeId: json['løype_id'],
       gruppenavn: json['gruppenavn'],
       status: status,
@@ -66,9 +66,9 @@ class DeltakerModel {
 
   DeltakerModel({required this.id, required this.navn});
 
-  factory DeltakerModel.fromJson(Map<String, dynamic> json) {
+  factory DeltakerModel.fromJson(String docId, Map<String, dynamic> json) {
     return DeltakerModel(
-      id: json['doc_id'],
+      id: docId,
       navn: json['brukernavn'],
     );
   }

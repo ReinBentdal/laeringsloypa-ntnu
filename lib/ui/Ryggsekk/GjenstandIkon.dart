@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/RyggsekkProvider.dart';
+import 'package:loypa/control/provider/RyggsekkProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
 import 'package:loypa/ui/Ryggsekk/GjenstandForhandsvisning.dart';
 import 'package:loypa/ui/widgets/atom/ShowAnimatedDialog.dart';
 import 'package:loypa/ui/widgets/atom/UpdateAlert.dart';
@@ -16,10 +18,14 @@ class GjenstandIkon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final ryggsekkGjenstand =
-        watch(ryggsekkGjenstandProvider(gjenstandIndex)).state;
+    final ryggsekkGjenstand = watch(ryggsekkGjenstandProvider(gjenstandIndex));
+    final gruppeId = context.read(gruppeIdProvider).state;
+    assert(gruppeId != null);
+    final loypeState = watch(loypeStateProvider(gruppeId!));
+    final gjenstandSett = loypeState.ryggsekkgjenstanderSett[ryggsekkGjenstand.id];
+    assert(gjenstandSett != null);
     return $UpdateAlert(
-      showAlert: !ryggsekkGjenstand.sett,
+      showAlert: !gjenstandSett!,
       child: FirebaseImage(
         prefix: 'gjenstander/',
         path: ryggsekkGjenstand.ikon,
@@ -32,9 +38,9 @@ class GjenstandIkon extends ConsumerWidget {
           .clipRRect(all: 15)
           .gestures(
         onTap: () {
-          context
-              .read(ryggsekkInnholdProvider.notifier)
-              .gjenstandSett(gjenstandIndex);
+          final gruppeId = context.read(gruppeIdProvider).state;
+          assert(gruppeId != null);
+          context.read(loypeStateProvider(gruppeId!).notifier).settRyggsekkgjenstandSett(context, ryggsekkGjenstand.id);
           $showAnimatedDialog(
             context: context,
             builder: (context) {

@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
-import 'package:loypa/data/provider/timerProvider.dart';
+import 'package:loypa/control/loypeControl.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/timerProvider.dart';
 import 'package:loypa/ui/Dashbord/DashbordSide.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
@@ -26,65 +24,46 @@ class _AvsluttLoypeState extends State<AvsluttLoype> {
   Duration? tidsbruk;
   bool resultatPublisert = false;
   int? plassering;
+  String? gruppeId;
+  String? loypeId;
 
   @override
   void initState() {
     super.initState();
     () async {
-      context.read(timerProvider.notifier).stoppTimer();
-      final gruppeId = context.read(gruppeIdProvider).state;
-      final gruppe = await context.read(gruppeProvider(gruppeId!).future);
+ 
+      final gruppe = await context.read(gruppeProvider.future);
 
-      // hvis spillet ikke er gyldig på grunn av brukte hint, skal tiden ikke lastes opp til ledertavlen
-      if (gruppe.gyldig == false) {
-        setState(() {
-          resultatPublisert = true;
-        });
-        varsling(
-          context,
-          tittel: 'Resultat',
-          beskrivelse:
-              'Siden hjelpemiddelet for å automatisk løse en oppgave ble brukt, er ikke spillet gyldig og resultatet blir ikke publisert.',
+      setState(() {
+        gruppeId = gruppe.gruppeId;
+        loypeId = gruppe.loypeId;
+      });
+
+       await LoypeControl.fullforLoype(context);
+    
+      final gruppeOppdatert = await context.read(gruppeProvider.future);
+
+      setState(() {
+        this.tidsbruk = Duration(
+          milliseconds: gruppeOppdatert.sluttTid!.millisecondsSinceEpoch -
+              gruppeOppdatert.startTid!.millisecondsSinceEpoch,
         );
-      } else {
-        final loypeId = context.read(loypeIdProvider).state;
+      });
 
-        if (gruppe.sluttTid == null) {
-          final tid = DateTime.now();
-          final straffetid = gruppe.hintBrukt * 5000;
-          final tidBrukt = Duration(
-            milliseconds: tid.millisecondsSinceEpoch -
-                gruppe.startTid!.millisecondsSinceEpoch +
-                straffetid,
-          );
-          await FirebaseFirestore.instance
-              .collection('grupper')
-              .doc(gruppeId)
-              .update({
-            'slutt_tid': tid,
-            'status': 'avsluttet',
-          });
-          await FirebaseFirestore.instance.collection('ledertavle').add({
-            'gruppe_id': gruppeId,
-            'løype_id': loypeId,
-            'navn': gruppe.gruppenavn,
-            'tidsstempel': DateTime.now(),
-            'tid': tidBrukt.inSeconds,
-          });
-          setState(() {
-            this.tidsbruk = tidBrukt;
-            resultatPublisert = true;
-          });
-        } else {
-          setState(() {
-            this.tidsbruk = Duration(
-              milliseconds: gruppe.sluttTid!.millisecondsSinceEpoch -
-                  gruppe.startTid!.millisecondsSinceEpoch,
-            );
-            resultatPublisert = true;
-          });
-        }
+      if (!gruppeOppdatert.gyldig) {
+        await varsling(
+          context,
+          tittel: 'Løypen ble ikke publisert',
+          beskrivelse: 'Fordi det ble brukt hjelpemiddel for å automatisk fullføre en oppgave kvalifiserer ikke gjennomførelsen til å bli publisert på ledertavlen.',
+        );
       }
+
+      LoypeControl.forlat(context, gruppe.gruppeId);
+
+      setState(() {
+        resultatPublisert = true;
+      });
+
       context.read(timerProvider.notifier).tilbakestill();
     }();
   }
@@ -128,8 +107,8 @@ class _AvsluttLoypeState extends State<AvsluttLoype> {
                           fontWeight: FontWeight.bold,
                         )),
                   Ledertavle(
-                    loypeId: context.read(loypeIdProvider).state!,
-                    gruppeId: context.read(gruppeIdProvider).state,
+                    loypeId: loypeId!,
+                    gruppeId: gruppeId,
                     rangeringCallback: (plassering) {
                       Future.delayed(Duration.zero).then((_) {
                         setState(() {
@@ -138,30 +117,11 @@ class _AvsluttLoypeState extends State<AvsluttLoype> {
                       });
                     },
                   ).padding(horizontal: 30).expanded(flex: 2),
-                  // Consumer(
-                  //   builder: (context, watch, child) {
-                  //     final erGruppe = watch(erGruppeProvider);
-                  //     return erGruppe.when(
-                  //       data: (data) => data == true
-                  //           ? child!
-                  //           : $Button(
-                  //               onPressed: () => null,
-                  //               text: 'Publiser result',
-                  //             ),
-                  //       loading: () =>
-                  //           LasterIndikator(beskrivelse: 'Laster informasjon'),
-                  //       error: (_, __) => SizedBox(),
-                  //     );
-                  //   },
-                  //   child: Text(
-                  //       'Kun personen som har opprettet gruppen kan publisere resultatene'),
-                  // ),
+
                   $Button(
                     onPressed: () async {
                       Navigator.popUntil(context, (_) => false);
                       await Navigator.pushNamed(context, DashbordSide.rute);
-                      context.read(gruppeIdProvider).state = null;
-                      context.read(loypeIdProvider).state = null;
                     },
                     text: 'Gå til startmenyen',
                   )

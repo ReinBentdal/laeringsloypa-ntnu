@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/loypeProvider.dart';
+import 'package:loypa/control/provider/loypeStateProvider.dart';
 import 'package:loypa/ui/Ryggsekk/GjenstandIkon.dart';
 import 'package:styled_widget/styled_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // local
 import 'package:loypa/data/model/Ryggsekk.dart';
-import 'package:loypa/data/provider/RyggsekkProvider.dart';
+import 'package:loypa/control/provider/RyggsekkProvider.dart';
 import 'package:loypa/ui/widgets/atom/SubpageAppbar.dart';
 
 class Ryggsekk extends StatelessWidget {

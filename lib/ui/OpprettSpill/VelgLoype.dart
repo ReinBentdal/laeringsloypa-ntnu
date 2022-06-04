@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
-import 'package:loypa/data/provider/loyperProvider.dart';
+import 'package:loypa/control/provider/loyperProvider.dart';
 import 'package:loypa/ui/Dashbord/LoypeCard.dart';
 import 'package:loypa/ui/OpprettSpill/OpprettGruppe.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
@@ -14,8 +13,7 @@ class VelgLoype extends StatelessWidget {
   const VelgLoype({Key? key}) : super(key: key);
 
   void velgLoype(BuildContext context, String id) {
-    context.read(loypeIdProvider).state = id;
-    Navigator.pushNamed(context, OpprettGruppe.rute);
+    Navigator.pushNamed(context, OpprettGruppe.rute, arguments: id);
   }
 
   @override
@@ -38,8 +36,8 @@ class VelgLoype extends StatelessWidget {
                       children: loyper
                           .map((loype) => LoypeCard(
                                 loype,
-                                visLedertavleKnapp: false,
-                                onVelg: () => velgLoype(context, loype.id),
+                                erGruppespill: true,
+                                onVelg: (_) => velgLoype(context, loype.id),
                               ))
                           .toList(),
                     );

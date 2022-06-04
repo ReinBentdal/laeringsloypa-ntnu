@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:loypa/ui/Hjelp/HjelpSide.dart';
+import 'package:loypa/ui/Valg/ValgSide.dart';
 
-class HjelpIkon extends StatelessWidget {
-  const HjelpIkon({
+class ValgIkon extends StatelessWidget {
+  const ValgIkon({
     Key? key,
     this.color,
   }) : super(key: key);
@@ -12,11 +12,11 @@ class HjelpIkon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () => Navigator.pushNamed(context, HjelpSide.rute),
+      onPressed: () => Navigator.pushNamed(context, ValgSide.rute),
       iconSize: 36,
       icon: Icon(
-        Icons.help_outline,
-        color: color ?? Theme.of(context).primaryColor,
+        Icons.settings_outlined,
+        color: color ?? Theme.of(context).accentColor,
       ),
     );
   }

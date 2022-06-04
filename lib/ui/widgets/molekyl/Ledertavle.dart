@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/ledertavleProvider.dart';
-import 'package:loypa/data/provider/loyperProvider.dart';
+import 'package:loypa/control/provider/ledertavleProvider.dart';
+import 'package:loypa/control/provider/loyperProvider.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
 import 'package:loypa/ui/widgets/atom/SColumn.dart';
 import 'package:loypa/utils/tid_formattering.dart';

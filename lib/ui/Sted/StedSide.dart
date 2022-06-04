@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:loypa/data/provider/RyggsekkProvider.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
-import 'package:loypa/data/provider/kartProvider.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
-import 'package:loypa/ui/Hjelp/HintSide.dart';
+import 'package:loypa/control/provider/RyggsekkProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
+import 'package:loypa/control/provider/kartProvider.dart';
+import 'package:loypa/control/provider/loypeProvider.dart';
 import 'package:loypa/ui/Kart/KartSide.dart';
 import 'package:loypa/ui/Reiseboka/ReisebokaSide.dart';
 import 'package:loypa/ui/Ryggsekk/RyggsekkSide.dart';
@@ -34,7 +33,7 @@ class _StedState extends State<Sted> {
       Navigator.popUntil(context, ModalRoute.withName(KartSide.rute));
       await Future.delayed(Duration(milliseconds: 300));
 
-      if (stedIndex.state + 1 == loypeLengde) {
+      if (stedIndex + 1 == loypeLengde) {
         kartTilstand.state = KartTilstand.SpillFerdig;
       } else {
         kartTilstand.state = KartTilstand.LokasjonFerdig;
@@ -70,7 +69,7 @@ class _StedState extends State<Sted> {
           body: SafeArea(
             child: Stack(
               children: [
-                HjelpIkon(key: hjelpRef).positioned(top: 10, right: 10),
+                ValgIkon(key: hjelpRef).positioned(top: 10, right: 10),
                 Styled.builder(
                   builder: (_, child) => child.padding(bottom: 20, top: 45),
                   child: SColumn(
@@ -92,7 +91,7 @@ class _StedState extends State<Sted> {
                           Consumer(
                             builder: (context, watch, _) {
                               return $UpdateAlert(
-                                showAlert: watch(ryggsekkHasNewProvider).state,
+                                showAlert: watch(ryggsekkHasNewProvider),
                                 child: $IconButton(
                                   key: ryggsekkRef,
                                   asset: 'assets/Ryggsekk.svg',

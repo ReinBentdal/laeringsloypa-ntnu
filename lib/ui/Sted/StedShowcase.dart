@@ -56,7 +56,7 @@ void visStedShowcase(BuildContext context,
               widgetRef: hjelpRef,
               tittel: 'Hjelp',
               beskrivelse:
-                  'Dersom du trenger hjelp kan du trykke på ?-ikonet øverst til høyre. Her vil du ha muligheten til å få et hint hvis du trenger det. \nDersom du benytter deg av et hint vil 5 minutter bli lagt til tiden din!\n\nDu kan også trykke på ?-ikonet for å åpne denne veilederen på nytt.\n\nTrykk på “Neste” for å gå videre.',
+                  'Dersom du trenger hjelp kan du trykke på tannhjul-ikonet øverst til høyre. Her vil du ha muligheten til å få et hint hvis du trenger det. \nDersom du benytter deg av et hint vil 5 minutter bli lagt til tiden din!\n\nDu kan også trykke på tannhjul-ikonet for å åpne denne veilederen på nytt.\n\nLykke til med første oppgave i løypen!',
             ),
           ],
         );

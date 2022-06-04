@@ -1,5 +1,7 @@
+
+
 class RyggsekkGjenstandModel {
-  bool sett = false; // TODO: fjerne
+  final String id;
   final String ikon;
   final String navn;
   final String beskrivelse;
@@ -7,6 +9,7 @@ class RyggsekkGjenstandModel {
   final String? tilpassetKnapptekst;
 
   RyggsekkGjenstandModel({
+    required this.id,
     required this.navn,
     required this.beskrivelse,
     required this.ikon,
@@ -16,6 +19,7 @@ class RyggsekkGjenstandModel {
 
   factory RyggsekkGjenstandModel.fromJson(Map<String, dynamic> json) {
     return RyggsekkGjenstandModel(
+      id: json['id'],
       navn: json['navn'],
       beskrivelse: json['beskrivelse'],
       ikon: json['ikon'],
@@ -25,7 +29,12 @@ class RyggsekkGjenstandModel {
   }
 
   Map<String, dynamic> toJson() {
-    final json = {'navn': navn, 'beskrivelse': beskrivelse, 'ikon': ikon};
+    final json = {
+      'id': id,
+      'navn': navn,
+      'beskrivelse': beskrivelse,
+      'ikon': ikon,
+    };
 
     if (ekstraRessurs != null)
       json.addAll({

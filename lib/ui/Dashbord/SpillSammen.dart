@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loypa/config/theme/inputDecoration.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
 import 'package:loypa/ui/OpprettSpill/VelgLoype.dart';
 import 'package:loypa/ui/Dashbord/VerifisererPin.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';

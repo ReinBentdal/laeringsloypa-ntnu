@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
-import 'package:loypa/data/provider/kartProvider.dart';
-import 'package:loypa/data/provider/timerProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
+import 'package:loypa/control/provider/kartProvider.dart';
+import 'package:loypa/control/provider/timerProvider.dart';
+import 'package:loypa/main.dart';
 import 'package:loypa/ui/Kart/KartShowcase.dart';
 import 'package:loypa/ui/widgets/atom/HjelpIkon.dart';
 import 'package:loypa/ui/widgets/atom/LasterIndikator.dart';
@@ -24,19 +25,9 @@ class GoogleMaps extends StatefulWidget {
 }
 
 class _GoogleMapsState extends State<GoogleMaps> {
-  bool visKart = false;
+  bool visKart = true;
   double _zoom = 16;
   GoogleMapController? _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      setState(() {
-        visKart = true;
-      });
-    });
-  }
 
   LatLng polygonCenter(List<LatLng> points) {
     double lat = 0;
@@ -66,8 +57,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             final markering = watch(valgtStedProvider).kartmarkering;
             final LatLng plasseringSenter = polygonCenter(markering);
             _controller?.animateCamera(CameraUpdate.newLatLngZoom(
-              LatLng(plasseringSenter.latitude - 0.0007,
-                  plasseringSenter.longitude),
+              LatLng(plasseringSenter.latitude - 0.0007, plasseringSenter.longitude),
               16,
             ));
             return ProviderListener<StateController<KartTilstand>>(
@@ -90,16 +80,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
                         ),
                         myLocationButtonEnabled: false,
                         myLocationEnabled: true,
-                        onMapCreated: (controller) async {
-                          String value = await DefaultAssetBundle.of(context)
-                              .loadString('lib/config/theme/kart.json');
-                          controller.setMapStyle(value);
+                        onMapCreated: (controller) {
                           _controller = controller;
-                          final kartTilstand =
-                              context.read(kartTilstandProvider);
-                          if (kartTilstand.state == KartTilstand.NyLokasjon)
-                            context.read(kartTilstandProvider).state =
-                                KartTilstand.NyLokasjon;
+                          // WidgetsBinding.instance?.addPostFrameCallback((_) async {
+                          //   final ctx = navigatorKey.currentContext ?? context;
+                          //   String value = await DefaultAssetBundle.of(ctx).loadString('lib/config/theme/kart.json');
+                          //   assert(_controller != null);
+                          //   _controller?.setMapStyle(value);
+                          // });
+
+                          /* force modal update */
+                          final ctx = navigatorKey.currentContext ?? context;
+                          final kartTilstand = ctx.read(kartTilstandProvider);
+                          if (kartTilstand.state == KartTilstand.NyLokasjon) {
+                            ctx.read(kartTilstandProvider).state = KartTilstand.NyLokasjon;
+                          }
                         },
                         polygons: {
                           Polygon(
@@ -112,9 +107,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                           ),
                         },
                       )
-                    : LasterIndikator(beskrivelse: 'Laster kart')
-                        .center()
-                        .decorated(color: Colors.white),
+                    : LasterIndikator(beskrivelse: 'Laster kart').center().decorated(color: Colors.white),
               ),
             );
           },
@@ -133,8 +126,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                 .card(
                   color: Theme.of(context).primaryColor,
                   elevation: 10,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 )
                 .gestures(
                   key: dinLokasjonRef,
@@ -160,24 +152,20 @@ class _GoogleMapsState extends State<GoogleMaps> {
                 .card(
                   color: Theme.of(context).accentColor,
                   elevation: 10,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 )
                 .gestures(
                   key: nesteLokasjonRef,
                   onTap: () {
-                    final markering =
-                        context.read(valgtStedProvider).kartmarkering;
+                    final markering = context.read(valgtStedProvider).kartmarkering;
                     final LatLng plasseringSenter = polygonCenter(markering);
                     _controller?.animateCamera(CameraUpdate.newLatLng(
-                      LatLng(plasseringSenter.latitude,
-                          plasseringSenter.longitude),
+                      LatLng(plasseringSenter.latitude, plasseringSenter.longitude),
                     ));
                   },
                 ),
           ],
-        ).positioned(
-            bottom: 15 + MediaQuery.of(context).padding.bottom, right: 15),
+        ).positioned(bottom: 15 + MediaQuery.of(context).padding.bottom, right: 15),
         Row(
           children: [
             const SizedBox(width: 50),
@@ -205,7 +193,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                 })
               ],
             ).expanded(),
-            HjelpIkon(
+            ValgIkon(
               color: Colors.white,
             )
           ],
@@ -216,8 +204,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
               color: Color(0xFF651015),
               borderRadius: BorderRadius.circular(20),
             )
-            .padding(
-                horizontal: 20, top: 20 + MediaQuery.of(context).padding.top)
+            .padding(horizontal: 20, top: 20 + MediaQuery.of(context).padding.top)
             .alignment(Alignment.topCenter),
         if (kDebugMode || globals.beta)
           Icon(
@@ -230,15 +217,13 @@ class _GoogleMapsState extends State<GoogleMaps> {
               .card(
                 color: Theme.of(context).errorColor,
                 elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               )
               .gestures(
             onTap: () {
               context.read(kartTilstandProvider).state = KartTilstand.Ankommet;
             },
-          ).positioned(
-                  left: 15, bottom: MediaQuery.of(context).padding.bottom + 15),
+          ).positioned(left: 15, bottom: MediaQuery.of(context).padding.bottom + 15),
       ],
     );
   }

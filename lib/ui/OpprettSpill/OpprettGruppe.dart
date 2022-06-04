@@ -1,10 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loypa/config/theme/inputDecoration.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
-import 'package:loypa/data/provider/randomProvider.dart';
+import 'package:loypa/control/loypeControl.dart';
 import 'package:loypa/ui/OpprettSpill/AdminLobby.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
 import 'package:loypa/ui/widgets/atom/varslinger.dart';
@@ -36,44 +32,40 @@ class OpprettGruppe extends StatelessWidget {
       return await varslingFeilmelding(
         context,
         tittel: 'Ugyldig brukernavn',
-        beskrivelse:
-            'Lengden på brukernavnet kan ikke være mer enn 20 karakterer.',
+        beskrivelse: 'Lengden på brukernavnet kan ikke være mer enn 20 karakterer.',
       );
     } else if (gruppenavn.length > 20) {
       return await varslingFeilmelding(
         context,
         tittel: 'Ugyldig gruppenavn',
-        beskrivelse:
-            'Lengden på gruppenavnet kan ikke være mer enn 20 karakterer.',
+        beskrivelse: 'Lengden på gruppenavnet kan ikke være mer enn 20 karakterer.',
       );
     }
 
     context.read(lasterProvider).state = true;
 
-    final docRef = await FirebaseFirestore.instance.collection('grupper').add({
-      'gruppenavn': gruppenavn,
-      'løype_id': context.read(loypeIdProvider).state,
-      'status': 'venter',
-      'tidsstempel': DateTime.now(),
-      'pin': (100000 + context.read(randomProvider).nextInt(899999)).toString(),
-      'gyldig': true,
-      'hint_brukt': 0,
-    });
+    final loypeId = ModalRoute.of(context)?.settings.arguments as String?;
 
-    final brukerId = FirebaseAuth.instance.currentUser!.uid;
-    final gruppeId = docRef.id;
-    context.read(gruppeIdProvider).state = gruppeId;
+    if (loypeId == null) {
+      Navigator.pop(context);
+      context.read(lasterProvider).state = false;
+      return;
+    }
 
-    await FirebaseFirestore.instance
-        .collection('grupper')
-        .doc(gruppeId)
-        .collection('deltakere')
-        .doc(brukerId)
-        .set({
-      'brukernavn': brukernavn,
-    });
+    final gruppeId = await LoypeControl.lag(context, loypeId, gruppenavn, true);
 
-    Navigator.popAndPushNamed(context, AdminLobby.rute);
+    if (gruppeId != null) {
+      bool suksess = await LoypeControl.deltaMedGruppeId(context, gruppeId, brukernavn);
+      if (suksess) {
+        Navigator.popAndPushNamed(context, AdminLobby.rute);
+        return;
+      }
+    }
+
+    await varslingFeilmelding(context,
+        tittel: 'Feilet', beskrivelse: 'En utventet feil førte til at gruppen ikke ble opprettet.');
+    Navigator.pop(context);
+
     context.read(lasterProvider).state = false;
   }
 
@@ -100,8 +92,7 @@ class OpprettGruppe extends StatelessWidget {
                     .constrained(maxWidth: 300),
                 TextField(
                   decoration: inputDecoration(context, 'Gruppenavn..'),
-                  onChanged: (value) =>
-                      context.read(gruppenavnProvider).state = value,
+                  onChanged: (value) => context.read(gruppenavnProvider).state = value,
                 ).constrained(maxWidth: 300),
               ],
             ),
@@ -116,8 +107,7 @@ class OpprettGruppe extends StatelessWidget {
                 Text('Dette er navnet du som spiller vil ha i spillet'),
                 TextField(
                   decoration: inputDecoration(context, 'Brukernavn..'),
-                  onChanged: (value) =>
-                      context.read(brukernavnProvider).state = value,
+                  onChanged: (value) => context.read(brukernavnProvider).state = value,
                 ).constrained(maxWidth: 300),
               ],
             ),

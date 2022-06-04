@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:loypa/control/loypeControl.dart';
 import 'package:loypa/data/model/Gruppe.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/loypeProvider.dart';
 import 'package:loypa/ui/Dashbord/DashbordSide.dart';
 import 'package:loypa/ui/OpprettSpill/GruppespillInfo.dart';
 import 'package:loypa/ui/widgets/atom/Button.dart';
@@ -22,20 +21,11 @@ class Lobby extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final gruppeid = context.read(gruppeIdProvider).state;
-        context.read(gruppeIdProvider).state = null;
-        context.read(loypeIdProvider).state = null;
-        final brukerId = FirebaseAuth.instance.currentUser!.uid;
-        await FirebaseFirestore.instance
-            .collection('grupper')
-            .doc(gruppeid)
-            .collection('deltakere')
-            .doc(brukerId)
-            .delete();
-        return true;
+        final gruppeId = context.read(gruppeIdProvider).state;
+        return await LoypeControl.forlat(context, gruppeId!);
       },
       child: ProviderListener(
-        provider: gruppeStreamProvider(context.read(gruppeIdProvider).state),
+        provider: gruppeStreamProvider,
         onChange: (context, AsyncValue<GruppeModel> data) {
           data.whenData((gruppe) {
             if (gruppe.status == GruppeStatus.Startet) {
@@ -60,9 +50,8 @@ class Lobby extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Consumer(builder: (context, watch, _) {
-                      final docId = watch(gruppeIdProvider).state;
-                      final gruppe = watch(gruppeStreamProvider(docId!));
-                      final deltakere = watch(gruppeDeltakereProvider(docId));
+                      final gruppe = watch(gruppeStreamProvider);
+                      final deltakere = watch(gruppeDeltakereProvider);
                       return gruppe.when(
                         data: (data) {
                           return Column(

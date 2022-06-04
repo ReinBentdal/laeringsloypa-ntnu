@@ -1,10 +1,11 @@
 class OppgaveHintModel {
   final String hint;
-  bool brukt;
+
+  // bool brukt;
 
   OppgaveHintModel({
     required this.hint,
-    this.brukt = false, // TODO: fjerne
+    // this.brukt = false,
   });
 
   factory OppgaveHintModel.fromJson(Map<String, dynamic> json) {

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:loypa/data/provider/stedProvider.dart';
-import 'package:loypa/data/provider/gruppeProvider.dart';
-import 'package:loypa/data/provider/kartProvider.dart';
-import 'package:loypa/data/provider/timerProvider.dart';
+import 'package:loypa/control/provider/stedProvider.dart';
+import 'package:loypa/control/provider/gruppeProvider.dart';
+import 'package:loypa/control/provider/kartProvider.dart';
+import 'package:loypa/control/provider/timerProvider.dart';
 import 'package:loypa/main.dart';
 import 'package:loypa/ui/Kart/Dialoger/FerdigMedLokasjon.dart';
 import 'package:loypa/ui/Kart/Dialoger/FremmeVedLokasjon.dart';
@@ -23,6 +23,7 @@ class Kart extends StatefulWidget {
 }
 
 class _KartState extends State<Kart> {
+  final googleMaps = GoogleMaps();
   bool visDialoger = false;
 
   @override
@@ -57,9 +58,9 @@ class _KartState extends State<Kart> {
   Future<void> startTid(BuildContext context) async {
     // antar gruppe veldefinert
     final gruppeId = context.read(gruppeIdProvider).state;
-    final gruppe = await context.read(gruppeProvider(gruppeId!).future);
+    final gruppe = await context.read(gruppeProvider.future);
     final tid = DateTime.now();
-    context.read(timerProvider.notifier).startTimer();
+    context.read(timerProvider.notifier).start();
     if (gruppe.startTid == null) {
       FirebaseFirestore.instance.collection('grupper').doc(gruppeId).update({
         'start_tid': tid,
@@ -70,7 +71,19 @@ class _KartState extends State<Kart> {
   void visTilstandDialog(
     BuildContext context,
     StateController<KartTilstand> tilstand,
-  ) {
+  ) async {
+    final stedIndex = context.read(stedIndexProvider);
+    final timer = context.read(timerProvider.notifier);
+    if (!timer.active) {
+      if (stedIndex > 0) {
+        final gruppe = await context.read(gruppeProvider.future);
+        timer.sett(gruppe.startTid ?? DateTime.now());
+        startTid(context);
+      } else if (stedIndex == 0 && (tilstand.state != KartTilstand.NyLokasjon || tilstand.state != KartTilstand.PaVei)) {
+        startTid(context);
+      }
+    }
+    
     switch (tilstand.state) {
       case KartTilstand.NyLokasjon:
         bottomSheet(
@@ -79,11 +92,6 @@ class _KartState extends State<Kart> {
         );
         break;
       case KartTilstand.Ankommet:
-        final stedIndex = context.read(stedIndexProvider).state;
-        if (stedIndex == 0) {
-          startTid(context);
-        }
-
         Navigator.popUntil(context, ModalRoute.withName(KartSide.rute));
         bottomSheet(
           context: context,
@@ -123,7 +131,6 @@ class _KartState extends State<Kart> {
 
   @override
   Widget build(BuildContext context) {
-    final googleMaps = GoogleMaps();
     if (visDialoger)
       return ProviderListener<StateController<KartTilstand>>(
         provider: kartTilstandProvider,
